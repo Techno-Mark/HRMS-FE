@@ -1,0 +1,54 @@
+export type FormValues = {
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    gender: string;
+    birthPlace: string;
+    maritalStatus: string;
+    currentSalary: string;
+    expectedSalary: string;
+    skillName: string;
+    interests: string;
+    email: string;
+    phone: string;
+    skype: string;
+    linkedIn: string;
+    profilePic: File | null;
+    cv: File | null;
+    housenumber: string;
+    building: string;
+    street: string;
+    area: string;
+    city: string;
+    state: string;
+    country: string;
+    zipcode: string;
+    referredBy: string[];
+    jobRole: string;
+    coverLetter: string;
+    relationship: string;
+    referenceName: string;
+    referenceDob: string;
+    referenceJob: string;
+    referenceAddress: string;
+    referencePhone: string;
+    workDetails: {
+      workFromDate: string;
+      workToDate: string;
+      workCompany: string;
+      workPosition: string;
+      workContactPerson: string;
+      workSalary: string;
+      workReasonLeaving: string;
+      workJobDescription: string;
+    }[];
+    educationalDetails: {
+      eduFromDate: string;
+      eduToDate: string;
+      eduCourse: string;
+      eduTrainingPlace: string;
+      eduSpecialized: string;
+      eduPercentage: string;
+    }[];
+  };
+  
