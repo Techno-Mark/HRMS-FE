@@ -14,14 +14,14 @@ import {
 } from '@mui/material';
 import { FormValues } from '@/types/types';
 
-interface Step2Props {
+interface ReferalInformationProps {
   errors: FormikErrors<FormValues>;
   touched: FormikTouched<FormValues>;
 }
 
 
 const today = new Date().toISOString().split('T')[0];
-const Step2: React.FC<Step2Props> = ({ errors, touched }) => {
+const ReferalInformation: React.FC<ReferalInformationProps> = ({ errors, touched }) => {
   const { values } = useFormikContext<FormValues>();
 
   return (
@@ -76,7 +76,7 @@ const Step2: React.FC<Step2Props> = ({ errors, touched }) => {
         </div>
 
         {/* Job Role and Cover Letter */}
-        <div className="w-full md:w-1/2">
+        <div className="w-full mt-5 md:mt-0 md:w-1/2">
           <p className="text-lg font-bold text-black mb-3">Job Role You&apos;re Applying For</p>
           <FormControl variant="standard" fullWidth>
             <InputLabel>Job Role</InputLabel>
@@ -93,7 +93,7 @@ const Step2: React.FC<Step2Props> = ({ errors, touched }) => {
               <p className="text-red-500 text-sm">{errors.jobRole}</p>
             )}
           </FormControl>
-          <p className="text-lg font-bold text-black mt-5 mb-3">Cover Letter</p>
+          <p className="text-lg font-bold text-black mt-5 mb-3">Cover Letter <span className='text-sm font-medium'>(Up to 500 characters)</span></p>
           <Field
             name="coverLetter"
             as={TextField}
@@ -186,4 +186,4 @@ const Step2: React.FC<Step2Props> = ({ errors, touched }) => {
   );
 };
 
-export default Step2;
+export default ReferalInformation;

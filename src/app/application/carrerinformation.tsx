@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { Field, FieldArray, ErrorMessage } from 'formik';
-import { TextField, Button, Grid, Box } from '@mui/material';
+import { TextField, Button, Grid, Box, Snackbar, Alert } from '@mui/material';
 import { FormikErrors, FormikTouched } from 'formik'; // Import necessary types
 import { FormValues } from '@/types/types';
 
@@ -25,16 +25,14 @@ interface EduDetail {
   eduPercentage: string;
 }
 
-interface Step3Props {
+interface carrerinformationProps {
   errors: FormikErrors<FormValues>;
   touched: FormikTouched<FormValues>;
 }
-const today = new Date().toISOString().split('T')[0];
-const Step3: React.FC<Step3Props> = ({ errors, touched }) => {
-  useEffect(() => {
-    console.log("Form Values in Step 3:", errors);
-  }, [errors]);
 
+const today = new Date().toISOString().split('T')[0];
+const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }) => {
+  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
   return (
     <div>
       {/* Work Details */}
@@ -158,19 +156,33 @@ const Step3: React.FC<Step3Props> = ({ errors, touched }) => {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => push({
-                workFromDate: '',
-                workToDate: '',
-                workCompany: '',
-                workPosition: '',
-                workContactPerson: '',
-                workSalary: '',
-                workReasonLeaving: '',
-                workJobDescription: ''
-              })}
+              onClick={() => {
+                const lastWorkDetail = form.values.workDetails[form.values.workDetails.length - 1];
+                const isLastEntryFilled = Object.values(lastWorkDetail as WorkDetail).every(
+                  (value) => typeof value === 'string' && value.trim() !== ''
+                );
+                if (isLastEntryFilled) {
+                  push({
+                    workFromDate: '',
+                    workToDate: '',
+                    workCompany: '',
+                    workPosition: '',
+                    workContactPerson: '',
+                    workSalary: '',
+                    workReasonLeaving: '',
+                    workJobDescription: ''
+                  });
+                } else {
+                  setSnackbar({
+                    open: true,
+                    message: 'Please fill all fields in the current work experience before adding a new one.',
+                  });
+                }
+              }}
             >
               Add Work Experience
             </Button>
+
           </Box>
         )}
       </FieldArray>
@@ -272,22 +284,48 @@ const Step3: React.FC<Step3Props> = ({ errors, touched }) => {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => push({
-                eduFromDate: '',
-                eduToDate: '',
-                eduCourse: '',
-                eduTrainingPlace: '',
-                eduSpecialized: '',
-                eduPercentage: ''
-              })}
+              onClick={() => {
+                const lastEduDetail = form.values.educationalDetails[form.values.educationalDetails.length - 1];
+                const isLastEntryFilled = Object.values(lastEduDetail as EduDetail).every(
+                  (value) => typeof value === 'string' && value.trim() !== ''
+                );
+                if (isLastEntryFilled) {
+                  push({
+                    eduFromDate: '',
+                    eduToDate: '',
+                    eduCourse: '',
+                    eduTrainingPlace: '',
+                    eduSpecialized: '',
+                    eduPercentage: ''
+                  });
+                } else {
+                  setSnackbar({
+                    open: true,
+                    message: 'Please fill all fields in the current educational detail before adding a new one.',
+                  });
+                }
+              }}
             >
               Add Educational Detail
             </Button>
+
           </Box>
         )}
       </FieldArray>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ open: false, message: '' })} 
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="warning" sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
     </div>
   );
 };
 
-export default Step3;
+export default Carrerinformation;

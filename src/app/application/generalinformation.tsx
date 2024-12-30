@@ -1,10 +1,10 @@
 import React from 'react';
-import { Field, FormikErrors, FormikProps, FormikTouched, useFormikContext } from 'formik';
+import { Field, FieldProps, FormikErrors, FormikProps, FormikTouched, useFormikContext } from 'formik';
 import { TextField, FormControl, InputLabel, Select, MenuItem, Grid, Box } from '@mui/material';
 import { countryStateCityData } from '@/static/locationdata';
 
 
-interface Step1Props {
+interface GeneralinformationProps {
   errors: FormikErrors<FormValues>;
   touched: FormikTouched<FormValues>;
 }
@@ -36,8 +36,8 @@ interface FormValues {
   cv: File | null;
 }
 
-const Step1: React.FC<Step1Props> = ({ errors, touched }) => {
-  const { values, setFieldValue } = useFormikContext<FormValues>();
+const Generalinformation: React.FC<GeneralinformationProps> = ({ errors, touched }) => {
+  const { values } = useFormikContext<FormValues>();
   const today = new Date().toISOString().split('T')[0]; // Get today's date in yyyy-mm-dd format
 
   // Helper function to render a text field
@@ -61,7 +61,9 @@ const Step1: React.FC<Step1Props> = ({ errors, touched }) => {
   // Helper function to render a select field
   const renderSelectField = (name: keyof FormValues, label: string, options: string[]) => (
     <FormControl variant="standard" fullWidth>
-      <InputLabel>{label}</InputLabel>
+      <InputLabel sx={{ color: !!touched[name] && !!errors[name] ? 'error.main' : 'text.primary', }}>
+        {label}
+      </InputLabel>
       <Field as={Select} name={name} error={!!touched[name] && !!errors[name]}>
         {options.map((option) => (
           <MenuItem key={option} value={option}>
@@ -98,7 +100,17 @@ const Step1: React.FC<Step1Props> = ({ errors, touched }) => {
                 inputProps={{
                   max: today, // Prevent selecting today's date and future dates
                 }}
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    color: !!touched['dateOfBirth'] && !!errors['dateOfBirth'] ? 'error.main' : 'text.primary', // Error color for label
+                  },
+                }}
+                InputProps={{
+                  sx: {
+                    color: !!touched['dateOfBirth'] && !!errors['dateOfBirth'] ? 'error.main' : 'text.primary', // Error color for input text
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -142,64 +154,83 @@ const Step1: React.FC<Step1Props> = ({ errors, touched }) => {
               {renderTextField('linkedIn', 'LinkedIn')}
             </Grid>
             <Grid item xs={12}>
-              <p className="text-lg font-bold text-black mt-10 mb-5">Permanent Address</p>
+              <p className="text-lg font-bold text-black">Permanent Address</p>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl variant="standard" fullWidth>
-                <InputLabel>Country</InputLabel>
-                <Select
-                  value={values.country || ''}
-                  onChange={(event) => {
-                    setFieldValue('country', event.target.value);
-                    setFieldValue('state', ''); // Reset state when country changes
-                    setFieldValue('city', '');  // Reset city when country changes
-                  }}
-                  error={!!touched.country && !!errors.country}
-                >
-                  {Object.keys(countryStateCityData).map((country) => (
-                    <MenuItem key={country} value={country}>
-                      {country}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Field name="country">
+                {({ field, form }: FieldProps<FormValues>) => (
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel>Country</InputLabel>
+                    <Select
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(event) => {
+                        const selectedCountry = event.target.value;
+                        form.setFieldValue('country', selectedCountry);
+                        form.setFieldValue('state', ''); // Reset state when country changes
+                        form.setFieldValue('city', '');  // Reset city when country changes
+                      }}
+                      error={!!touched.country && !!errors.country}
+                    >
+                      {Object.keys(countryStateCityData).map((country) => (
+                        <MenuItem key={country} value={country}>
+                          {country}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Field>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl variant="standard" fullWidth >
-                <InputLabel>State</InputLabel>
-                <Select
-                  value={values.state || ''}
-                  onChange={(event) => {
-                    setFieldValue('state', event.target.value);
-                    setFieldValue('city', ''); // Reset city when state changes
-                  }}
-                  error={!!touched.state && !!errors.state}
-                >
-                  {values.country &&
-                    Object.keys(countryStateCityData[values.country]).map((state) => (
-                      <MenuItem key={state} value={state}>
-                        {state}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
+              <Field name="state">
+                {({ field, form }: FieldProps<FormValues>) => (
+                  <FormControl variant="standard" fullWidth >
+                    <InputLabel>State</InputLabel>
+                    <Select
+                    {...field}
+                      value={field.value  || ''}
+                      onChange={(event) => {
+                        const selectedState = event.target.value;
+                        form.setFieldValue('state', selectedState );
+                        form.setFieldValue('city', ''); // Reset city when state changes
+                      }}
+                      error={!!touched.state && !!errors.state}
+                    >
+                      {values.country &&
+                        Object.keys(countryStateCityData[values.country]).map((state) => (
+                          <MenuItem key={state} value={state}>
+                            {state}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Field>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl variant="standard" fullWidth >
-                <InputLabel>City</InputLabel>
-                <Select
-                  value={values.city || ''}
-                  onChange={(event) => setFieldValue('city', event.target.value)}
-                  error={!!touched.city && !!errors.city}
-                >
-                  {values.state &&
-                    countryStateCityData[values.country][values.state].map((city) => (
-                      <MenuItem key={city} value={city}>
-                        {city}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
+              <Field name="city">
+                {({ field, form }: FieldProps<FormValues>) => (
+                  <FormControl variant="standard" fullWidth >
+                    <InputLabel>City</InputLabel>
+                    <Select
+                      {...field}
+                      value={field.value  || ''}
+                      onChange={(event) => {
+                        const selectedCity = event.target.value;
+                        form.setFieldValue('city', selectedCity)}}
+                      error={!!touched.city && !!errors.city}
+                    >
+                      {values.state &&
+                        countryStateCityData[values.country][values.state].map((city) => (
+                          <MenuItem key={city} value={city}>
+                            {city}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Field>
             </Grid>
             {[
               { name: 'housenumber', label: 'House Number' },
@@ -257,4 +288,4 @@ const Step1: React.FC<Step1Props> = ({ errors, touched }) => {
   );
 };
 
-export default Step1;
+export default Generalinformation;
