@@ -8,20 +8,17 @@ const Hiring = () => {
    const router = useRouter();
 
   const handleRedirect = () => {
-    router.push("/applicant");
+    router.push("/application");
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-[100vh] gap-[20px]">
-      <Image src="/images/joinourteam.jpg" alt="join-team" width={500} height={700}/>
-      <div className="flex items-center gap-4">
-        <Link href="/applicant">
-          <Image src="/images/applicantqr.png" alt="QR" width={100} height={100}/>
+    <div className="flex flex-col items-center justify-center h-screen gap-[20px]">
+        <Link href="/application">
+          <Image src="/images/qrcode.png" alt="QR" width={150} height={150}/>
         </Link>
         <Button variant="contained" color="primary" onClick={handleRedirect}>
           Apply Here
         </Button>
-      </div>
     </div>
   )
 }
