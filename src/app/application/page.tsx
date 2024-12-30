@@ -84,6 +84,7 @@ const Application: React.FC = () => {
   const router = useRouter(); 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const initialValues: FormValues = {
@@ -173,6 +174,7 @@ const Application: React.FC = () => {
     validateForm: (values: FormValues) => Promise<FormikErrors<FormValues>>,
     setTouched: (touched: { [key: string]: boolean }) => void
   ) => {
+    setButtonLoading(true); 
     const errors = await validateForm(values);
     if (Object.keys(errors).length === 0) {
       setStep(step + 1);
@@ -184,6 +186,13 @@ const Application: React.FC = () => {
       }, {} as { [key: string]: boolean });
       setTouched(touchedFields);
     }
+    setButtonLoading(false);
+  };
+
+  const handleBack = () => {
+    setButtonLoading(true); 
+    setStep(step - 1);
+    setButtonLoading(false); 
   };
 
   return (
@@ -215,19 +224,18 @@ const Application: React.FC = () => {
               </div>
               <div className="flex justify-end gap-4 absolute bottom-0 left-0 w-full px-10 py-2 bg-white z-9 border-t">
                 {step > 1 && (
-                  <Button variant="outlined" onClick={() => setStep(step - 1)}>
-                    Back
+                  <Button variant="outlined" onClick={handleBack} disabled={buttonLoading}>
+                    {buttonLoading ? (<CircularProgress size={24} /> ) : ("Back")}
                   </Button>
                 )}
                 {step < 3 && (
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() =>
-                      handleNext(values, validateForm, setTouched)
-                    }
+                    onClick={() =>handleNext(values, validateForm, setTouched)}
+                    disabled={buttonLoading}
                   >
-                    Next
+                     {buttonLoading ? ( <CircularProgress size={24} />) : ("Next")}
                   </Button>
                 )}
                 {step === 3 && (
