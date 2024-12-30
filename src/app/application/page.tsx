@@ -72,16 +72,6 @@ const getValidationSchema = (step: number) => {
         referredBy: Yup.array()
           .min(1, "At least one referral method is required")
           .of(Yup.string().required()),
-        relationship: Yup.string().required("Relationship is required"),
-        referenceName: Yup.string().required("Reference Name is required"),
-        referenceDob: Yup.date()
-          .required("Reference Date of Birth is required")
-          .max(new Date(), "Date cannot be in the future"),
-        referenceJob: Yup.string().required("Reference Job is required"),
-        referenceAddress: Yup.string().required("Reference Address is required"),
-        referencePhone: Yup.string()
-          .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
-          .required("Phone is required"),
       });
     case 3:
       return Yup.object({
