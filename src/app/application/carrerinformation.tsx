@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Field, FieldArray, ErrorMessage } from 'formik';
-import { TextField, Button, Grid, Box, Snackbar, Alert } from '@mui/material';
+import { TextField, Button, Grid, Box} from '@mui/material';
 import { FormikErrors, FormikTouched } from 'formik'; // Import necessary types
 import { FormValues } from '@/types/types';
 
@@ -32,7 +32,6 @@ interface carrerinformationProps {
 
 const today = new Date().toISOString().split('T')[0];
 const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }) => {
-  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
   return (
     <div>
       {/* Work Details */}
@@ -77,7 +76,7 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
                     <Field
                       as={TextField}
                       name={`workDetails[${index}].workCompany`}
-                      label="Company"
+                      label="Company*"
                       fullWidth
                       variant="standard"
                       error={!!(errors.workDetails?.[index] && (errors.workDetails[index] as FormikErrors<WorkDetail>).workCompany && touched.workDetails?.[index]?.workCompany)}
@@ -142,14 +141,15 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
                   </Grid>
                 </Grid>
                 <div className="my-5">
+                {form.values.workDetails.length > 1 && (
                   <Button
                     variant="contained"
                     onClick={() => remove(index)}
                     disabled={form.values.workDetails.length === 1}
-                    className={`my-5`}
                   >
                     Remove Work Experience
                   </Button>
+                )}  
                 </div>
               </Box>
             ))}
@@ -157,11 +157,12 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
               variant="contained"
               color="primary"
               onClick={() => {
-                const lastWorkDetail = form.values.workDetails[form.values.workDetails.length - 1];
-                const isLastEntryFilled = Object.values(lastWorkDetail as WorkDetail).every(
-                  (value) => typeof value === 'string' && value.trim() !== ''
-                );
-                if (isLastEntryFilled) {
+                const lastIndex = form.values.workDetails.length - 1;
+                const lastWorkDetail = form.values.workDetails[lastIndex];
+                if (!lastWorkDetail.workCompany.trim()) {
+                  form.setFieldTouched(`workDetails[${lastIndex}].workCompany`, true, true);
+                  form.setFieldError(`workDetails[${lastIndex}].workCompany`, 'This field is required.');
+                } else {
                   push({
                     workFromDate: '',
                     workToDate: '',
@@ -172,12 +173,7 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
                     workReasonLeaving: '',
                     workJobDescription: ''
                   });
-                } else {
-                  setSnackbar({
-                    open: true,
-                    message: 'Please fill all fields in the current work experience before adding a new one.',
-                  });
-                }
+                } 
               }}
             >
               Add Work Experience
@@ -229,7 +225,7 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
                     <Field
                       as={TextField}
                       name={`educationalDetails[${index}].eduCourse`}
-                      label="Course"
+                      label="Course*"
                       fullWidth
                       variant="standard"
                       error={!!(errors.educationalDetails?.[index] && (errors.educationalDetails[index] as FormikErrors<EduDetail>).eduCourse && touched.educationalDetails?.[index]?.eduCourse)}
@@ -271,6 +267,7 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
                   </Grid>
                 </Grid>
                 <div className="my-5">
+                {form.values.educationalDetails.length > 1 && (
                   <Button
                     variant="contained"
                     onClick={() => remove(index)}
@@ -278,6 +275,7 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
                   >
                     Remove Educational Detail
                   </Button>
+                )}  
                 </div>
               </Box>
             ))}
@@ -285,11 +283,12 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
               variant="contained"
               color="primary"
               onClick={() => {
-                const lastEduDetail = form.values.educationalDetails[form.values.educationalDetails.length - 1];
-                const isLastEntryFilled = Object.values(lastEduDetail as EduDetail).every(
-                  (value) => typeof value === 'string' && value.trim() !== ''
-                );
-                if (isLastEntryFilled) {
+                const lastIndex = form.values.educationalDetails.length - 1;
+                const lastEduDetail = form.values.educationalDetails[lastIndex];
+                if (!lastEduDetail.eduCourse.trim()) {
+                  form.setFieldTouched(`educationalDetails[${lastIndex}].eduCourse`, true, true);
+                  form.setFieldError(`educationalDetails[${lastIndex}].eduCourse`, 'This field is required.');
+                } else  {
                   push({
                     eduFromDate: '',
                     eduToDate: '',
@@ -298,12 +297,7 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
                     eduSpecialized: '',
                     eduPercentage: ''
                   });
-                } else {
-                  setSnackbar({
-                    open: true,
-                    message: 'Please fill all fields in the current educational detail before adding a new one.',
-                  });
-                }
+                } 
               }}
             >
               Add Educational Detail
@@ -312,18 +306,6 @@ const Carrerinformation: React.FC<carrerinformationProps> = ({ errors, touched }
           </Box>
         )}
       </FieldArray>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ open: false, message: '' })} 
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert severity="warning" sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-
     </div>
   );
 };

@@ -77,7 +77,7 @@ const ReferalInformation: React.FC<ReferalInformationProps> = ({ errors, touched
 
         {/* Job Role and Cover Letter */}
         <div className="w-full mt-5 md:mt-0 md:w-1/2">
-          <p className="text-lg font-bold text-black mb-3">Job Role You&apos;re Applying For</p>
+          <p className="text-lg font-bold text-black mb-3">Job Role You&apos;re Applying For*</p>
           <FormControl variant="standard" fullWidth>
             <InputLabel>Job Role</InputLabel>
             <Field
@@ -93,7 +93,7 @@ const ReferalInformation: React.FC<ReferalInformationProps> = ({ errors, touched
               <p className="text-red-500 text-sm">{errors.jobRole}</p>
             )}
           </FormControl>
-          <p className="text-lg font-bold text-black mt-5 mb-3">Cover Letter <span className='text-sm font-medium'>(Up to 500 characters)</span></p>
+          <p className="text-lg font-bold text-black mt-5 mb-3">Cover Letter* <span className='text-sm font-medium'>(Up to 500 characters)</span></p>
           <Field
             name="coverLetter"
             as={TextField}

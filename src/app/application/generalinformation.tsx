@@ -82,23 +82,23 @@ const Generalinformation: React.FC<GeneralinformationProps> = ({ errors, touched
         <Box>
           <Grid container spacing={4}>
             <Grid item xs={12} sm={6}>
-              {renderTextField('firstName', 'First Name')}
+              {renderTextField('firstName', 'First Name*')}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderTextField('lastName', 'Last Name')}
+              {renderTextField('lastName', 'Last Name*')}
             </Grid>
             <Grid item xs={12} sm={6}>
               <Field
                 name="dateOfBirth"
                 as={TextField}
-                label="Date of Birth"
+                label="Date of Birth*"
                 type="date"
                 variant="standard"
                 fullWidth
                 error={!!touched['dateOfBirth'] && !!errors['dateOfBirth']}
                 helperText={touched['dateOfBirth'] && errors['dateOfBirth']}
                 inputProps={{
-                  max: today, // Prevent selecting today's date and future dates
+                  max: today,
                 }}
                 InputLabelProps={{
                   shrink: true,
@@ -114,19 +114,19 @@ const Generalinformation: React.FC<GeneralinformationProps> = ({ errors, touched
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderSelectField('gender', 'Gender', ['Male', 'Female', 'Other'])}
+              {renderSelectField('gender', 'Gender*', ['Male', 'Female', 'Other'])}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderTextField('birthPlace', 'Birth Place')}
+              {renderTextField('birthPlace', 'Birth Place*')}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderSelectField('maritalStatus', 'Marital Status', ['Single', 'Married'])}
+              {renderSelectField('maritalStatus', 'Marital Status*', ['Single', 'Married'])}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderTextField('currentSalary', 'Current Salary (in lpa)', 'number')}
+              {renderTextField('currentSalary', 'Current Salary* (in lpa)', 'number')}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderTextField('expectedSalary', 'Expected Salary (in lpa)', 'number')}
+              {renderTextField('expectedSalary', 'Expected Salary* (in lpa)', 'number')}
             </Grid>
             <Grid item xs={12}>
               {renderSelectField('skillName', 'Skill Name', ['Frontend', 'Backend'])}
@@ -142,16 +142,16 @@ const Generalinformation: React.FC<GeneralinformationProps> = ({ errors, touched
         <Box>
           <Grid container spacing={4}>
             <Grid item xs={12} sm={6}>
-              {renderTextField('email', 'Email', 'email')}
+              {renderTextField('email', 'Email*', 'email')}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderTextField('phone', 'Phone', 'tel')}
+              {renderTextField('phone', 'Phone*', 'tel')}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderTextField('skype', 'Skype')}
+              {renderTextField('skype', 'Skype*')}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderTextField('linkedIn', 'LinkedIn')}
+              {renderTextField('linkedIn', 'LinkedIn*')}
             </Grid>
             <Grid item xs={12}>
               <p className="text-lg font-bold text-black">Permanent Address</p>
