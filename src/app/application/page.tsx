@@ -76,6 +76,8 @@ const getValidationSchema = (step: number) => {
         referredBy: Yup.array()
           .min(1, "At least one referral method is required")
           .of(Yup.string().required()),
+        referencePhone: Yup.string()
+        .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")  
       });
     case 3:
       return Yup.object({
@@ -83,13 +85,37 @@ const getValidationSchema = (step: number) => {
           .of(
             Yup.object({
               workCompany: Yup.string().required("Company Name is required"),
+              workFromDate: Yup.date()
+                .nullable(),
+              workToDate: Yup.date()
+                .nullable()
+                .test(
+                  'is-greater',
+                  'Work To Date must be later than Work From Date',
+                  function (value) {
+                    const { workFromDate } = this.parent;
+                    return !value || !workFromDate || new Date(value) > new Date(workFromDate);
+                  }
+              ),
             })
           ),
         educationalDetails: Yup.array()
           .of(
             Yup.object({
               eduCourse: Yup.string().required("Course is required"),
-            })
+              eduFromDate: Yup.date()
+              .nullable(),
+              eduToDate: Yup.date()
+                .nullable()
+                .test(
+                  'is-greater',
+                  'Edu To Date must be later than Edu From Date',
+                  function (value) {
+                    const { eduFromDate } = this.parent;
+                    return !value || !eduFromDate || new Date(value) > new Date(eduFromDate);
+                  }
+                ),
+              })
           ),
       });   
   }
