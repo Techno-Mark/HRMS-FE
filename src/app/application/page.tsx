@@ -77,6 +77,21 @@ const getValidationSchema = (step: number) => {
           .min(1, "At least one referral method is required")
           .of(Yup.string().required()),
       });
+    case 3:
+      return Yup.object({
+        workDetails: Yup.array()
+          .of(
+            Yup.object({
+              workCompany: Yup.string().required("Company Name is required"),
+            })
+          ),
+        educationalDetails: Yup.array()
+          .of(
+            Yup.object({
+              eduCourse: Yup.string().required("Course is required"),
+            })
+          ),
+      });   
   }
 };
 
@@ -151,10 +166,27 @@ const Application: React.FC = () => {
   ) => {
     setLoading(true);
     try {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        if (key === "profilePic" || key === "cv") {
+          formData.append(key, value as File);
+        } else if (Array.isArray(value)) {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value as string | Blob);
+        }
+      });
+  
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/submit`,
-        values
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+  
       if (response.status === 200) {
         console.log("Form submitted successfully:", response.data);
         actions.resetForm();
@@ -168,7 +200,7 @@ const Application: React.FC = () => {
       router.push("/thankyou")
     }
   };
-
+  
   const handleNext = async (
     values: FormValues,
     validateForm: (values: FormValues) => Promise<FormikErrors<FormValues>>,
@@ -205,8 +237,6 @@ const Application: React.FC = () => {
           initialValues={initialValues}
           validationSchema={getValidationSchema(step)}
           enableReinitialize={true}
-          validateOnChange={false}
-          validateOnBlur={false} 
           onSubmit={handleSubmit}
         >
           {({
