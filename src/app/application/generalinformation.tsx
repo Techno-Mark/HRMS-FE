@@ -1,43 +1,37 @@
 import React from 'react';
-import { Field, FieldProps, FormikErrors, FormikProps, FormikTouched, useFormikContext } from 'formik';
-import { TextField, FormControl, InputLabel, Select, MenuItem, Grid, Box } from '@mui/material';
-import { countryStateCityData } from '@/static/locationdata';
-
+import { Field, FieldArray, FormikErrors, FormikTouched, useFormikContext } from 'formik';
+import { TextField, FormControl, InputLabel, Select, MenuItem, Grid, Box, Checkbox, FormControlLabel, FormGroup, RadioGroup, Radio } from '@mui/material';
 
 interface GeneralinformationProps {
   errors: FormikErrors<FormValues>;
   touched: FormikTouched<FormValues>;
 }
 
-interface FormValues {
-  firstName: string;
-  lastName: string;
+const referenceOptions = ["LinkedIn", "Friend", "Job Portal", "Other"];
+
+export type FormValues = {
+  fullName: string;
   dateOfBirth: string;
-  gender: string;
-  birthPlace: string;
-  maritalStatus: string;
-  currentSalary: number;
-  expectedSalary: number;
-  skillName: string;
-  interests: string;
-  email: string;
-  phone: string;
-  skype: string;
-  linkedIn: string;
-  housenumber: string;
-  building: string;
-  street: string;
-  area: string;
+  address: string;
   city: string;
-  state: string;
-  country: string;
-  zipcode: string;
-  profilePic: File | null;
-  cv: File | null;
-}
+  phone: string;
+  email: string;
+  education: string;
+  experience: string;
+  pastExperience: string[];
+  organization: string;
+  currentCtc: string;
+  notice: string;
+  skills: string[]
+  position: string;
+  reference: string;
+  otherReference: string;
+  referredBy: string;
+  otherSkill: string;
+};
 
 const Generalinformation: React.FC<GeneralinformationProps> = ({ errors, touched }) => {
-  const { values } = useFormikContext<FormValues>();
+  const { values, setFieldValue } = useFormikContext<FormValues>();
   const today = new Date().toISOString().split('T')[0]; // Get today's date in yyyy-mm-dd format
 
   // Helper function to render a text field
@@ -77,17 +71,14 @@ const Generalinformation: React.FC<GeneralinformationProps> = ({ errors, touched
 
   return (
     <div className="flex flex-col md:flex-row gap-6">
-      <div className="w-full md:w-1/2 pr-4">
+      <div className="w-full pr-4">
         <p className="text-lg font-bold text-black mb-5">General Information</p>
         <Box>
           <Grid container spacing={4}>
-            <Grid item xs={12} sm={6}>
-              {renderTextField('firstName', 'First Name*')}
+            <Grid item xs={12} sm={8}>
+              {renderTextField('fullName', 'Full Name*')}
             </Grid>
-            <Grid item xs={12} sm={6}>
-              {renderTextField('lastName', 'Last Name*')}
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <Field
                 name="dateOfBirth"
                 as={TextField}
@@ -113,173 +104,177 @@ const Generalinformation: React.FC<GeneralinformationProps> = ({ errors, touched
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              {renderSelectField('gender', 'Gender*', ['Male', 'Female', 'Other'])}
+            <Grid item xs={12} sm={8}>
+              {renderTextField('address', 'Address*')}
             </Grid>
-            <Grid item xs={12} sm={6}>
-              {renderTextField('birthPlace', 'Birth Place*')}
+            <Grid item xs={12} sm={4}>
+              {renderSelectField('city', 'City*', ['Ahmedabad', 'Mumbai', 'Hyderabad'])}
             </Grid>
-            <Grid item xs={12} sm={6}>
-              {renderSelectField('maritalStatus', 'Marital Status*', ['Single', 'Married'])}
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              {renderTextField('currentSalary', 'Current Salary* (in lpa)', 'number')}
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              {renderTextField('expectedSalary', 'Expected Salary* (in lpa)', 'number')}
-            </Grid>
-            <Grid item xs={12}>
-              {renderSelectField('skillName', 'Skill Name', ['Frontend', 'Backend'])}
-            </Grid>
-            <Grid item xs={12}>
-              {renderTextField('interests', 'Interests')}
-            </Grid>
-          </Grid>
-        </Box>
-      </div>
-      <div className="w-full md:w-1/2 pr-4">
-        <p className="text-lg font-bold text-black mb-5">Contact Information</p>
-        <Box>
-          <Grid container spacing={4}>
-            <Grid item xs={12} sm={6}>
-              {renderTextField('email', 'Email*', 'email')}
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={3}>
               {renderTextField('phone', 'Phone*', 'tel')}
             </Grid>
-            <Grid item xs={12} sm={6}>
-              {renderTextField('skype', 'Skype*')}
+            <Grid item xs={12} sm={3}>
+              {renderTextField('email', 'Email*', 'email')}
             </Grid>
-            <Grid item xs={12} sm={6}>
-              {renderTextField('linkedIn', 'LinkedIn*')}
+            <Grid item xs={12} sm={3}>
+              {renderTextField('education', 'Education*')}
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              {renderTextField('experience', 'Experience*')}
             </Grid>
             <Grid item xs={12}>
-              <p className="text-lg font-bold text-black">Permanent Address</p>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Field name="country">
-                {({ field, form }: FieldProps<FormValues>) => (
-                  <FormControl variant="standard" fullWidth>
-                    <InputLabel>Country</InputLabel>
-                    <Select
-                      {...field}
-                      value={field.value || ''}
-                      onChange={(event) => {
-                        const selectedCountry = event.target.value;
-                        form.setFieldValue('country', selectedCountry);
-                        form.setFieldValue('state', ''); // Reset state when country changes
-                        form.setFieldValue('city', '');  // Reset city when country changes
-                      }}
-                      error={!!touched.country && !!errors.country}
-                    >
-                      {Object.keys(countryStateCityData).map((country) => (
-                        <MenuItem key={country} value={country}>
-                          {country}
-                        </MenuItem>
+              <FormGroup>
+                <p className="text-lg font-bold text-black mb-5">Past Experience*</p>
+                <FieldArray name="pastExperience">
+                  {({ remove, push }) => (
+                    <div className="grid md:grid-cols-3">
+                      {[
+                        "International Accounting",
+                        "Indian Accounting",
+                        "Fresher",
+                      ].map((option) => (
+                        <FormControlLabel
+                          key={option}
+                          control={
+                            <Checkbox
+                              checked={values.pastExperience.includes(option)}
+                              onChange={(event) => {
+                                if (event.target.checked) {
+                                  push(option);
+                                } else {
+                                  const index = values.pastExperience.indexOf(option);
+                                  remove(index);
+                                }
+                              }}
+                            />
+                          }
+                          label={option}
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
+                              color: '#000000',
+                            },
+                          }}
+                        />
                       ))}
-                    </Select>
-                  </FormControl>
+                    </div>
+                  )}
+                </FieldArray>
+                {errors.pastExperience && touched.pastExperience && (
+                  <p className="text-red-500 text-sm">{errors.pastExperience}</p>
                 )}
-              </Field>
+              </FormGroup>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Field name="state">
-                {({ field, form }: FieldProps<FormValues>) => (
-                  <FormControl variant="standard" fullWidth >
-                    <InputLabel>State</InputLabel>
-                    <Select
-                    {...field}
-                      value={field.value  || ''}
-                      onChange={(event) => {
-                        const selectedState = event.target.value;
-                        form.setFieldValue('state', selectedState );
-                        form.setFieldValue('city', ''); // Reset city when state changes
-                      }}
-                      error={!!touched.state && !!errors.state}
-                    >
-                      {values.country &&
-                        Object.keys(countryStateCityData[values.country]).map((state) => (
-                          <MenuItem key={state} value={state}>
-                            {state}
-                          </MenuItem>
-                        ))}
-                    </Select>
-                  </FormControl>
-                )}
-              </Field>
+            <Grid item xs={12} sm={4}>
+              {renderTextField('organization', 'Organization*')}
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Field name="city">
-                {({ field, form }: FieldProps<FormValues>) => (
-                  <FormControl variant="standard" fullWidth >
-                    <InputLabel>City</InputLabel>
-                    <Select
-                      {...field}
-                      value={field.value  || ''}
-                      onChange={(event) => {
-                        const selectedCity = event.target.value;
-                        form.setFieldValue('city', selectedCity)}}
-                      error={!!touched.city && !!errors.city}
-                    >
-                      {values.state &&
-                        countryStateCityData[values.country][values.state].map((city) => (
-                          <MenuItem key={city} value={city}>
-                            {city}
-                          </MenuItem>
-                        ))}
-                    </Select>
-                  </FormControl>
-                )}
-              </Field>
+            <Grid item xs={12} sm={4}>
+              {renderTextField('currentCtc', 'Current/Last CTC (Monthly salary)*', 'number')}
             </Grid>
-            {[
-              { name: 'housenumber', label: 'House Number' },
-              { name: 'building', label: 'Building Name' },
-              { name: 'street', label: 'Street Name' },
-              { name: 'area', label: 'Area' },
-              { name: 'zipcode', label: 'Zipcode' },
-            ].map(({ name, label }) => (
-              <Grid key={name} item xs={12} sm={6}>
-                {renderTextField(name as keyof FormValues, label)}
-              </Grid>
-            ))}
-            <Grid item xs={12}>
-              <Field name="profilePic">
-                {({ form }: { form: FormikProps<FormValues> }) => (
-                  <TextField
-                    label="Profile Picture"
-                    type="file"
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{ accept: 'image/*' }}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      const file = event.target.files?.[0];
-                      form.setFieldValue('profilePic', file);
-                    }}
-                    fullWidth
-                    error={!!touched.profilePic && !!errors.profilePic}
-                    helperText={touched.profilePic && errors.profilePic}
-                  />
-                )}
-              </Field>
+            <Grid item xs={12} sm={4}>
+              {renderTextField('notice', 'Notice period(In days)*', 'number')}
             </Grid>
             <Grid item xs={12}>
-              <Field name="cv">
-                {({ form }: { form: FormikProps<FormValues> }) => (
+              <FormGroup>
+                <p className="text-lg font-bold text-black mb-5">skills*</p>
+                <FieldArray name="skills">
+                  {({ remove, push }) => (
+                    <div className="grid md:grid-cols-3">
+                      {[
+                        "MS Excel",
+                        "QuickBooks",
+                        "SAP Finance",
+                        "Xero",
+                        "Tally ERP",
+                        "Other"
+                      ].map((option) => (
+                        <FormControlLabel
+                          key={option}
+                          control={
+                            <Checkbox
+                              checked={values.skills.includes(option)}
+                              onChange={(event) => {
+                                if (event.target.checked) {
+                                  push(option);
+                                } else {
+                                  const index = values.skills.indexOf(option);
+                                  remove(index);
+                                }
+                              }}
+                            />
+                          }
+                          label={option}
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
+                              color: '#000000',
+                            },
+                          }}
+                        />
+                      ))}
+                      {values.skills.includes("Other") && (
+                        <div className="mt-3">
+                          <TextField
+                            name="otherSkill"
+                            label="Please specify"
+                            variant="standard"
+                            fullWidth
+                            value={values.otherSkill}
+                            onChange={(e) => setFieldValue("otherSkill", e.target.value)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </FieldArray>
+                {errors.skills && touched.skills && (
+                  <p className="text-red-500 text-sm">{errors.skills}</p>
+                )}
+              </FormGroup>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              {renderSelectField('position', 'Position*', ['Staff accountant', 'Senior accountant', 'Team Leader'])}
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth variant="standard">
+                <p className="text-lg font-bold text-black mb-5">Source of information about Walk-In*</p>
+                <RadioGroup
+                  name="reference"
+                  value={values.reference}
+                  onChange={(e) => setFieldValue("reference", e.target.value)}
+                  
+                >
+                  <div className="grid md:grid-cols-3">
+                    {referenceOptions.map((ref) => (
+                      <FormControlLabel
+                        key={ref}
+                        value={ref}
+                        control={<Radio />}
+                        label={ref}
+                        sx={{
+                          '& .MuiFormControlLabel-label': {
+                            color: '#000000',
+                          },
+                        }}
+                      />
+                    ))}
+                  </div>
+                </RadioGroup>
+                {values.reference === "Other" && (
                   <TextField
-                    label="Candidate CV"
-                    type="file"
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{ accept: 'application/pdf' }}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      const file = event.target.files?.[0];
-                      form.setFieldValue('cv', file);
-                    }}
                     fullWidth
-                    error={!!touched.cv && !!errors.cv}
-                    helperText={touched.cv && errors.cv}
+                    variant="standard"
+                    label="Please specify"
+                    value={values.otherReference}
+                    onChange={(e) => setFieldValue("otherReference", e.target.value)}
+                    sx={{ mt: 2 }}
                   />
                 )}
-              </Field>
+                {errors.reference && touched.reference && (
+                  <p className="text-red-500 text-sm">{errors.reference}</p>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              {renderTextField('referredBy', 'referredBy*')}
             </Grid>
           </Grid>
         </Box>

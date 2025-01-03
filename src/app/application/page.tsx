@@ -1,182 +1,150 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Formik, Form, FormikHelpers, FormikErrors } from "formik";
+import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { Button, CircularProgress, Snackbar } from "@mui/material";
 import Generalinformation from "./generalinformation";
-import ReferalInformation from "./referalInformation";
-import Carrerinformation from "./carrerinformation";
 import { FormValues } from "@/types/types";
 import styles from "./application.module.css"
 
 
-const getValidationSchema = (step: number) => {
-  switch (step) {
-    case 1:
-      return Yup.object({
-        firstName: Yup.string().required("First Name is required"),
-        lastName: Yup.string().required("Last Name is required"),
-        dateOfBirth: Yup.date()
-          .required("Date of Birth is required")
-          .max(new Date(), "Date cannot be in the future"),
-        gender: Yup.string().required("Gender is required"),
-        birthPlace: Yup.string().required("Birth Place is required"),
-        maritalStatus: Yup.string().required("Marital Status is required"),
-        currentSalary: Yup.number()
-          .required("Current Salary is required")
-          .positive("Must be a positive number"),
-        expectedSalary: Yup.number()
-          .required("Expected Salary is required")
-          .positive("Must be a positive number"),
-        email: Yup.string()
-          .email("Invalid email format")
-          .required("Email is required"),
-        phone: Yup.string()
-          .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
-          .required("Phone is required"),
-        skype: Yup.string().required("Skype Id is required"),
-        linkedIn: Yup.string()
-          .required("LinkedIn URL is required")
-          .matches(/^https:\/\/in\.linkedin\.com\//, "LinkedIn URL must start with https://in.linkedin.com/"),
-        profilePic: Yup.mixed<File>()
-          .nullable()
-          .test(
-            "fileSize",
-            "File size should be less than 1MB",
-            (value) => !value || (value && value.size <= 1024 * 1024)
-          )
-          .test(
-            "fileFormat",
-            "Unsupported format. Upload an image file (JPG, PNG).",
-            (value) =>
-              !value ||
-              (value &&
-                ["image/jpeg", "image/png", "image/jpg"].includes(value.type))
-          ),
-        cv: Yup.mixed<File>()
-          .nullable()
-          .test(
-            "fileSize",
-            "File size should be less than 1MB",
-            (value) => !value || (value && value.size <= 1024 * 1024)
-          )
-          .test(
-            "fileFormat",
-            "Unsupported format. Please upload a PDF file.",
-            (value) => !value || (value && value.type === "application/pdf")
-          ),
-      });
-    case 2:
-      return Yup.object({
-        jobRole: Yup.string().required("Job Role is required"),
-        coverLetter: Yup.string().required("Cover Letter is required")
-          .max(500, "Cover Letter cannot exceed 500 characters"),
-        referredBy: Yup.array()
-          .min(1, "At least one referral method is required")
-          .of(Yup.string().required()),
-      });
-    case 3:
-      return Yup.object({
-        workDetails: Yup.array()
-          .of(
-            Yup.object({
-              workCompany: Yup.string().required("Company Name is required"),
-            })
-          ),
-        educationalDetails: Yup.array()
-          .of(
-            Yup.object({
-              eduCourse: Yup.string().required("Course is required"),
-            })
-          ),
-      });   
-  }
-};
+const getValidationSchema = Yup.object({
+  fullName: Yup.string()
+    .required('Full Name is required.')
+    .min(2, 'Full Name must be between 2 and 100 characters.')
+    .max(100, 'Full Name must be between 2 and 100 characters.')
+    .matches(
+      /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/,
+      'Full Name can only contain letters and spaces.'
+    )
+    .test(
+      'no-special-chars',
+      'Full Name should not contain numbers or special characters.',
+      (value) => !/[\d@#$%^&*()_+=[\]{};':"\\|,.<>/?~`-]/.test(value || '')
+    ),
+  dateOfBirth: Yup.string()
+    .required('Date of Birth is required.')
+    .test(
+      'valid-date',
+      'Please enter a valid date.',
+      (value) => {
+        if (!value) return false;
+        const date = new Date(value.split('/').reverse().join('-'));
+        return !isNaN(date.getTime()); // Returns true if the date is valid
+      }
+    )
+    .test(
+      'not-future-date',
+      'Date of Birth cannot be a future date.',
+      (value) => {
+        if (!value) return true; // If no value, it's considered valid
+        const today = new Date();
+        const date = new Date(value.split('/').reverse().join('-'));
+        return date <= today; // Returns true if the date is not in the future
+      }
+    ),
+  address: Yup.string()
+    .required('Address is required')
+    .min(5, 'Address must be between 5 and 255 characters')
+    .max(255, 'Address must be between 5 and 255 characters')
+    .matches(
+      /^[a-zA-Z0-9\s,.-/]+$/,
+      'Address should not contain special characters such as @, #, &, or *.'
+    )
+    .matches(
+      /^[\w\s,.-/]+$/,
+      'Please use valid punctuation in the address (e.g., commas, periods, hyphens).'
+    ),
+  city: Yup.string().required("City is required"),
+  phone: Yup.string()
+    .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+    .required("Phone is required"),
+  email: Yup.string().email("Invalid email format").required("Email is required"),
+  education: Yup.string().required("Education is required"),
+  experience: Yup.string()
+    .required("Experience is required")
+    .matches(
+      /^[A-Za-z0-9\s.]+$/,
+      "Please enter a valid experience details."
+    ),
+  organization: Yup.string()
+    .required("Organization is required")
+    .min(2, "Current organization name must be between 2 and 100 characters")
+    .max(100, "Current organization name must be between 2 and 100 characters"),
+  currentCtc: Yup.number()
+    .required('Current/Last CTC is required')
+    .min(1000, 'Please enter a CTC value between ₹1,000 and ₹1,00,00,000.')
+    .max(1000000, 'Please enter a CTC value between ₹1,000 and ₹1,00,00,000.')
+    .typeError('Current CTC must be a valid number'),
+  notice: Yup.number()
+    .required('Notice period is required')
+    .min(0, 'Notice period cannot be a negative number'),
+  position: Yup.string().required("Position is required"),
+  referredBy: Yup.string().required("Please enter Referral/Vendor/Consultant details."),
+  // skills: Yup.array()
+  //   .min(1, "At least one skill is required")
+  //   .of(Yup.string().required()),
+  pastExperience: Yup.array()
+  .min(1, "At least one is required")
+  .of(Yup.string().required()),
+  reference: Yup.string().required("Reference is required."),
+});
 
 const Application: React.FC = () => {
-  const router = useRouter(); 
-  const [step, setStep] = useState(1);
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [buttonLoading, setButtonLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const initialValues: FormValues = {
-    firstName: "",
-    lastName: "",
+    fullName: "",
     dateOfBirth: "",
-    gender: "",
-    birthPlace: "",
-    maritalStatus: "",
-    currentSalary: "",
-    expectedSalary: "",
-    skillName: "",
-    interests: "",
-    email: "",
-    phone: "",
-    skype: "",
-    linkedIn: "",
-    profilePic: null,
-    cv: null,
-    housenumber: "",
-    building: "",
-    street: "",
-    area: "",
+    address: "",
     city: "",
-    state: "",
-    country: "",
-    zipcode: "",
-    referredBy: [],
-    jobRole: "",
-    coverLetter: "",
-    relationship: "",
-    referenceName: "",
-    referenceDob: "",
-    referenceJob: "",
-    referenceAddress: "",
-    referencePhone: "",
-    workDetails: [
-      {
-        workFromDate: "",
-        workToDate: "",
-        workCompany: "",
-        workPosition: "",
-        workContactPerson: "",
-        workSalary: "",
-        workReasonLeaving: "",
-        workJobDescription: "",
-      },
-    ],
-    educationalDetails: [
-      {
-        eduFromDate: "",
-        eduToDate: "",
-        eduCourse: "",
-        eduTrainingPlace: "",
-        eduSpecialized: "",
-        eduPercentage: "",
-      },
-    ],
+    phone: "",
+    email: "",
+    education: "",
+    experience: "",
+    pastExperience: [],
+    organization: "",
+    currentCtc: "",
+    notice: "",
+    skills: [],
+    position: "",
+    reference: "",
+    otherReference: "",
+    referredBy: "",
+    otherSkill: ""
   };
 
   const handleSubmit = async (
     values: FormValues,
     actions: FormikHelpers<FormValues>
   ) => {
+    console.log("here in submit")
     setLoading(true);
+    setErrorMessage(null);
+
+    if (values.reference === "Other" && values.otherReference) {
+      values.reference = values.otherReference;
+    }
+
+    if (values.skills.includes("Other") && values.otherSkill) {
+      values.skills = values.skills.filter(skill => skill !== "Other");
+      values.skills.push(values.otherSkill);
+    }
+
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        if (key === "profilePic" || key === "cv") {
-          formData.append(key, value as File);
-        } else if (Array.isArray(value)) {
+        if (Array.isArray(value)) {
           formData.append(key, JSON.stringify(value));
         } else {
           formData.append(key, value as string | Blob);
         }
       });
-  
+
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/submit`,
         formData,
@@ -186,7 +154,7 @@ const Application: React.FC = () => {
           },
         }
       );
-  
+
       if (response.status === 200) {
         console.log("Form submitted successfully:", response.data);
         actions.resetForm();
@@ -200,32 +168,6 @@ const Application: React.FC = () => {
       router.push("/thankyou")
     }
   };
-  
-  const handleNext = async (
-    values: FormValues,
-    validateForm: (values: FormValues) => Promise<FormikErrors<FormValues>>,
-    setTouched: (touched: { [key: string]: boolean }) => void
-  ) => {
-    setButtonLoading(true); 
-    const errors = await validateForm(values);
-    if (Object.keys(errors).length === 0) {
-      setStep(step + 1);
-    } else {
-      const fields = Object.keys(errors);
-      const touchedFields = fields.reduce((acc, field) => {
-        acc[field] = true;
-        return acc;
-      }, {} as { [key: string]: boolean });
-      setTouched(touchedFields);
-    }
-    setButtonLoading(false);
-  };
-
-  const handleBack = () => {
-    setButtonLoading(true); 
-    setStep(step - 1);
-    setButtonLoading(false); 
-  };
 
   return (
     <div className="p-6 bg-gray-100 h-screen">
@@ -235,49 +177,27 @@ const Application: React.FC = () => {
         </h2>
         <Formik
           initialValues={initialValues}
-          validationSchema={getValidationSchema(step)}
+          validationSchema={getValidationSchema}
           enableReinitialize={true}
           onSubmit={handleSubmit}
         >
           {({
             errors,
             touched,
-            setTouched,
-            validateForm,
-            values,
           }) => (
             <Form className={`${styles.formcontainer} relative h-[86vh]`}>
               <div className={`${styles.formsubcontainer} max-h-[80vh] overflow-y-auto p-6`}>
-                {step === 1 && <Generalinformation errors={errors} touched={touched} />}
-                {step === 2 && <ReferalInformation errors={errors} touched={touched} />}
-                {step === 3 && <Carrerinformation errors={errors} touched={touched} />}
+                <Generalinformation errors={errors} touched={touched} />
               </div>
               <div className="flex justify-end gap-4 absolute bottom-0 left-0 w-full px-10 py-2 bg-white z-9 border-t">
-                {step > 1 && (
-                  <Button variant="outlined" onClick={handleBack} disabled={buttonLoading}>
-                    {buttonLoading ? (<CircularProgress size={24} /> ) : ("Back")}
-                  </Button>
-                )}
-                {step < 3 && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() =>handleNext(values, validateForm, setTouched)}
-                    disabled={buttonLoading}
-                  >
-                     {buttonLoading ? ( <CircularProgress size={24} />) : ("Next")}
-                  </Button>
-                )}
-                {step === 3 && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? <CircularProgress size={24} /> : "Submit"}
-                  </Button>
-                )}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? <CircularProgress size={24} /> : "Submit"}
+                </Button>
               </div>
             </Form>
           )}
@@ -288,6 +208,7 @@ const Application: React.FC = () => {
         autoHideDuration={6000}
         onClose={() => setErrorMessage(null)}
         message={errorMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       />
     </div>
   );
