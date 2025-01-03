@@ -5,5 +5,10 @@
     max-height: 86vh;
 }
 .formsubcontainer{
-    max-height: 80vh;
+    max-height: 85vh;
+}
+@media (max-width: 767px) {
+    .jobcontainer{
+        max-width: 100%;
+    }
 }
